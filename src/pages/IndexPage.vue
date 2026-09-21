@@ -1,1148 +1,347 @@
 <template>
-  <q-page class="bg-grey-2">
+  <q-page class="bg-white" style="min-height: 100vh;">
 
-    <!-- ================= HEADER ================= -->
+    <!-- ==================================================
+         TOP HEADER
+    =================================================== -->
+    <div
+      class="row items-center no-wrap"
+      style="
+        width: 100%;
+        min-height: 88px;
+        padding: 12px 4%;
+        gap: 24px;
+        background: white;
+      "
+    >
 
-    <q-header class="bg-white text-dark shadow-1">
-
-      <q-toolbar class="q-px-lg">
-
-        <div class="text-h6 text-primary text-weight-bold">
-          My Shop
-        </div>
-
-        <q-space />
-
-        <q-btn
-          flat
-          no-caps
-          label="Categories"
-          icon-right="keyboard_arrow_down"
-          color="primary"
+      <!-- LOGO -->
+      <div style="min-width: 190px;">
+        <q-img
+          src="https://upload.wikimedia.org/wikipedia/commons/a/a1/AliExpress_logo_2024.png"
+          width="180px"
+          fit="contain"
+          no-spinner
         />
+      </div>
 
-        <q-btn
-          flat
-          round
-          icon="favorite_border"
-          color="primary"
-          @click="showWishlist"
-        />
 
-        <q-btn
-          flat
-          round
-          icon="shopping_cart"
-          color="primary"
-          @click="cartDialog = true"
+      <!-- SEARCH -->
+      <div style="flex: 1; max-width: 750px;">
+
+        <q-input
+          v-model="search"
+          outlined
+          rounded
+          dense
+          placeholder="1 Cent Items"
         >
-
-          <q-badge
-            v-if="cartQuantity > 0"
-            color="orange"
-            floating
-          >
-            {{ cartQuantity }}
-          </q-badge>
-
-        </q-btn>
-
-      </q-toolbar>
-
-    </q-header>
-
-
-    <!-- ================= MAIN PAGE ================= -->
-
-    <div class="page-container">
-
-      <div class="row q-col-gutter-md">
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT IMAGE GALLERY -->
-        <!-- ================================================= -->
-
-        <div class="col-12 col-md-4">
-
-          <q-card flat class="bg-white">
-
-            <div class="main-image-wrapper">
-
-              <q-btn
-                round
-                flat
-                icon="chevron_left"
-                class="gallery-arrow left-arrow"
-                @click="previousImage"
-              />
-
-              <q-img
-                :src="selectedImage"
-                height="480px"
-                fit="contain"
-                class="main-product-image"
-                @click="openImagePreview"
-              />
-
-              <q-btn
-                round
-                flat
-                icon="chevron_right"
-                class="gallery-arrow right-arrow"
-                @click="nextImage"
-              />
-
-              <div class="image-number">
-                {{ currentImageIndex + 1 }}
-                /
-                {{ productImages.length }}
-              </div>
-
-            </div>
-
-
-            <!-- THUMBNAILS -->
-
-            <div class="row items-center q-pa-md">
-
-              <q-btn
-                flat
-                round
-                icon="chevron_left"
-                @click="previousImage"
-              />
-
-              <div class="row col q-col-gutter-sm">
-
-                <div
-                  v-for="(image, index) in productImages"
-                  :key="image"
-                  class="col"
-                >
-
-                  <q-img
-                    :src="image"
-                    height="75px"
-                    fit="contain"
-                    class="thumbnail"
-                    :class="{
-                      'selected-thumbnail':
-                        currentImageIndex === index
-                    }"
-                    @click="selectImage(index)"
-                  />
-
-                </div>
-
-              </div>
-
-              <q-btn
-                flat
-                round
-                icon="chevron_right"
-                @click="nextImage"
-              />
-
-            </div>
-
-
-            <div class="text-center q-pb-md">
-
-              <q-btn
-                flat
-                no-caps
-                icon="zoom_in"
-                label="View larger image"
-                color="primary"
-                @click="openImagePreview"
-              />
-
-            </div>
-
-          </q-card>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT INFORMATION -->
-        <!-- ================================================= -->
-
-        <div class="col-12 col-md-5">
-
-          <q-card flat class="bg-white q-pa-lg">
-
-
-            <!-- TITLE -->
-
-            <div class="product-title">
-
-              Stylish Full Check Trouser Pant for Men -
-              Multicolor Random - Joggers For Men
-
-            </div>
-
-
-            <!-- SHARE / WISHLIST -->
-
-            <div class="row justify-end">
-
-              <q-btn
-                flat
-                round
-                icon="share"
-                @click="shareProduct"
-              />
-
-              <q-btn
-                flat
-                round
-                :icon="
-                  wishlist
-                    ? 'favorite'
-                    : 'favorite_border'
-                "
-                color="red"
-                @click="toggleWishlist"
-              />
-
-            </div>
-
-
-            <!-- RATING -->
-
-            <div class="row items-center q-mt-sm">
-
-              <q-rating
-                v-model="productRating"
-                color="orange"
-                size="25px"
-                readonly
-              />
-
-              <span class="text-primary q-ml-sm">
-                {{ ratingCount }} Ratings
-              </span>
-
-              <q-separator
-                vertical
-                class="q-mx-sm"
-              />
-
-              <span class="text-primary">
-                2 Answered Questions
-              </span>
-
-            </div>
-
-
-            <!-- BRAND -->
-
-            <div class="q-mt-lg text-grey-7">
-
-              Brand:
-
-              <span class="text-primary">
-                No Brand
-              </span>
-
-              <span class="q-mx-sm">
-                |
-              </span>
-
-              <span class="text-primary">
-                More Men from No Brand
-              </span>
-
-            </div>
-
-
-            <q-separator class="q-my-lg" />
-
-
-            <!-- PRICE -->
-
-            <div class="price">
-              ৳ {{ productPrice }}
-            </div>
-
-            <div class="q-mt-sm">
-
-              <span class="old-price">
-                ৳ 500
-              </span>
-
-              <span class="q-ml-md">
-                -62%
-              </span>
-
-            </div>
-
-
-            <q-separator class="q-my-lg" />
-
-
-            <!-- COLOR -->
-
-            <div class="row items-center">
-
-              <div class="option-label">
-                Color Family
-              </div>
-
-              <div class="text-weight-medium">
-                {{ selectedColor }}
-              </div>
-
-            </div>
-
-
-            <div class="row q-gutter-sm q-mt-md">
-
-              <q-btn
-                v-for="color in colors"
-                :key="color"
-                :label="color"
-                no-caps
-                flat
-                class="color-btn"
-                :class="{
-                  'active-color':
-                    selectedColor === color
-                }"
-                @click="selectColor(color)"
-              />
-
-            </div>
-
-
-            <q-img
-              :src="selectedImage"
-              width="65px"
-              height="65px"
-              fit="contain"
-              class="color-image q-mt-md"
+          <template #append>
+
+            <q-icon
+              name="center_focus_strong"
+              size="23px"
+              class="q-mr-sm cursor-pointer"
             />
-
-
-            <!-- SIZE -->
-
-            <div class="row q-mt-xl">
-
-              <div class="option-label">
-                Size
-              </div>
-
-              <div class="size-container">
-
-                <q-btn
-                  v-for="size in sizes"
-                  :key="size"
-                  :label="size"
-                  flat
-                  no-caps
-                  class="size-btn"
-                  :class="{
-                    'active-size':
-                      selectedSize === size
-                  }"
-                  @click="selectSize(size)"
-                />
-
-              </div>
-
-            </div>
-
-
-            <!-- QUANTITY -->
-
-            <div class="row items-center q-mt-xl">
-
-              <div class="option-label">
-                Quantity
-              </div>
-
-              <q-btn
-                flat
-                round
-                icon="remove"
-                :disable="quantity === 1"
-                @click="decreaseQuantity"
-              />
-
-              <div class="quantity">
-                {{ quantity }}
-              </div>
-
-              <q-btn
-                flat
-                round
-                icon="add"
-                @click="increaseQuantity"
-              />
-
-            </div>
-
-
-            <!-- SUBTOTAL -->
-
-            <div class="row justify-between q-mt-lg">
-
-              <div class="text-grey-7">
-                Subtotal
-              </div>
-
-              <div class="text-h6 text-orange">
-                ৳ {{ subtotal }}
-              </div>
-
-            </div>
-
-
-            <!-- BUTTONS -->
-
-            <div class="row q-col-gutter-md q-mt-xl">
-
-              <div class="col">
-
-                <q-btn
-                  class="buy-btn full-width"
-                  label="Buy Now"
-                  no-caps
-                  @click="buyNow"
-                />
-
-              </div>
-
-              <div class="col">
-
-                <q-btn
-                  class="cart-btn full-width"
-                  label="Add to Cart"
-                  icon="shopping_cart"
-                  no-caps
-                  @click="addToCart"
-                />
-
-              </div>
-
-            </div>
-
-          </q-card>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- DELIVERY -->
-        <!-- ================================================= -->
-
-        <div class="col-12 col-md-3">
-
-          <q-card flat class="bg-white">
-
-
-            <div class="side-section">
-
-              <div class="side-title">
-                Delivery Options
-              </div>
-
-
-              <div class="row q-mt-lg">
-
-                <q-icon
-                  name="location_on"
-                  size="28px"
-                  color="grey-7"
-                />
-
-                <div class="q-ml-md">
-
-                  <div>
-                    {{ deliveryArea }}
-                  </div>
-
-                  <div>
-                    {{ deliveryAddress }}
-                  </div>
-
-                </div>
-
-                <q-space />
-
-                <q-btn
-                  flat
-                  no-caps
-                  label="CHANGE"
-                  color="primary"
-                  @click="addressDialog = true"
-                />
-
-              </div>
-
-            </div>
-
-
-            <q-separator />
-
-
-            <div class="side-section">
-
-              <div class="row">
-
-                <q-icon
-                  name="local_shipping"
-                  size="28px"
-                  color="grey-7"
-                />
-
-                <div class="q-ml-md">
-
-                  <div>
-                    Standard Delivery
-                  </div>
-
-                  <div class="text-grey-6">
-                    Guaranteed by 22-25 Sep
-                  </div>
-
-                </div>
-
-                <q-space />
-
-                ৳ 85
-
-              </div>
-
-            </div>
-
-
-            <q-separator />
-
-
-            <div class="side-section">
-
-              <div class="row items-center">
-
-                <q-icon
-                  name="payments"
-                  size="28px"
-                  color="grey-7"
-                />
-
-                <span class="q-ml-md">
-                  Cash on Delivery Available
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <q-separator />
-
-
-            <div class="side-section">
-
-              <div class="side-title">
-                Return & Warranty
-              </div>
-
-
-              <div class="row q-mt-lg">
-
-                <q-icon
-                  name="favorite_border"
-                  size="25px"
-                />
-
-                <span class="q-ml-md">
-                  Change of Mind
-                </span>
-
-              </div>
-
-
-              <div class="row q-mt-lg">
-
-                <q-icon
-                  name="update"
-                  size="25px"
-                />
-
-                <span class="q-ml-md">
-                  14 days easy return
-                </span>
-
-              </div>
-
-
-              <div class="row q-mt-lg">
-
-                <q-icon
-                  name="verified_user"
-                  size="25px"
-                />
-
-                <span class="q-ml-md">
-                  Warranty not available
-                </span>
-
-              </div>
-
-            </div>
-
-          </q-card>
-
-
-          <!-- SELLER -->
-
-          <q-card
-            flat
-            class="bg-white q-mt-md q-pa-md"
-          >
-
-            <div class="text-grey-7">
-              Sold by
-            </div>
-
-            <div class="text-h6">
-              LIFE STYLE
-            </div>
-
-            <q-separator class="q-my-md" />
-
-
-            <div class="row text-center">
-
-              <div class="col">
-
-                <div class="text-grey-7">
-                  Positive Seller
-                </div>
-
-                <div class="text-h5">
-                  83%
-                </div>
-
-              </div>
-
-
-              <div class="col">
-
-                <div class="text-grey-7">
-                  Ship on Time
-                </div>
-
-                <div class="text-h5">
-                  100%
-                </div>
-
-              </div>
-
-            </div>
-
 
             <q-btn
-              outline
-              color="primary"
-              label="GO TO STORE"
-              no-caps
-              class="full-width q-mt-md"
+              round
+              dense
+              unelevated
+              color="dark"
+              icon="search"
             />
 
-          </q-card>
+          </template>
+        </q-input>
 
+      </div>
+
+
+      <!-- DOWNLOAD APP -->
+      <div
+        class="row items-center no-wrap"
+        style="gap: 8px; white-space: nowrap;"
+      >
+
+        <q-icon
+          name="qr_code_2"
+          size="31px"
+        />
+
+        <div>
+          <div style="font-size: 11px;">
+            Download the
+          </div>
+
+          <div style="font-size: 13px;">
+            AliExpress app
+          </div>
         </div>
 
       </div>
 
 
-      <!-- ================================================= -->
-      <!-- PRODUCT DETAILS -->
-      <!-- ================================================= -->
+      <!-- LANGUAGE -->
+      <q-btn-dropdown
+        flat
+        dense
+        no-caps
+      >
 
-      <q-card flat class="bg-white q-mt-md">
+        <template #label>
 
-        <div class="section-title">
-          Product details of Stylish Full Check Trouser Pant
-        </div>
+          <div class="row items-center no-wrap">
 
-        <q-separator />
+            <span style="font-size: 23px;">
+              🇧🇩
+            </span>
 
+            <div class="q-ml-sm text-left">
 
-        <!-- ALWAYS VISIBLE PART -->
+              <div style="font-size: 11px;">
+                EN/
+              </div>
 
-        <div class="q-pa-lg">
-
-          <ul class="product-details">
-
-            <li>
-              প্রোডাক্ট: পুরুষদের স্টাইলিশ জিন্স প্যান্ট 
-            </li>
-
-            <li>
-              ম্যাটেরিয়াল: কটন + অন্যান্য
-            </li>
-
-            <li>
-              কালার: ছবি অনুযায়ী
-            </li>
-
-            <li>
-              এক পাশে চেইনসহ পকেট আছে।
-            </li>
-
-            <li>
-              পিছনে মানিব্যাগ রাখার পকেট আছে।
-            </li>
-
-            <li>
-              কোমরের ইলাস্টিক রাবার ও ফিতা আছে।
-            </li>
-
-            <li>
-              মাল্টিকালার অর্ডারে যেকোনো কালার দেওয়া হয়।
-            </li>
-
-            <li>
-              সাইজ বুঝতে না পারলে চ্যাট এ আমাদের সাথে
-              যোগাযোগ করতে পারেন।
-            </li>
-
-            <li>
-              Product Type: Trouser
-            </li>
-
-          </ul>
-
-
-          <!-- EXTRA PART -->
-
-          <div
-            v-if="showDetails"
-            class="extra-details"
-          >
-
-            <ul class="product-details">
-
-              <li>
-                Color: Multicolor
-              </li>
-
-              <li>
-                Main Material: Mixed Cotton
-              </li>
-
-              <li>
-                S - waist 26-28, long 34/35
-              </li>
-
-              <li>
-                M - waist 27-29, long 38-40
-              </li>
-
-              <li>
-                L - waist 29-31, long 42
-              </li>
-
-              <li>
-                XL - waist 32-35, long 44
-              </li>
-
-              <li>
-                XXL - waist 35-38, long 44-46
-              </li>
-
-              <li>
-                3XL - waist 37-42, long 46-48
-              </li>
-
-              <li>
-                #joggers for men
-              </li>
-
-            </ul>
-
-          </div>
-
-        </div>
-
-
-        <!-- VIEW MORE / LESS -->
-
-        <div class="text-center q-pb-lg">
-
-          <q-btn
-            outline
-            color="primary"
-            no-caps
-            :label="
-              showDetails
-                ? 'VIEW LESS'
-                : 'VIEW MORE'
-            "
-            @click="
-              showDetails = !showDetails
-            "
-          />
-
-        </div>
-
-      </q-card>
-
-
-      <!-- ================================================= -->
-      <!-- SPECIFICATIONS -->
-      <!-- ================================================= -->
-
-      <q-card flat class="bg-white q-mt-md">
-
-        <div class="section-title">
-          Specifications of Product
-        </div>
-
-        <q-separator />
-
-
-        <div class="row q-pa-lg">
-
-          <div class="col-12 col-md-6">
-
-            <div class="text-grey-7">
-              Brand
-            </div>
-
-            <div>
-              No Brand
-            </div>
-
-
-            <div class="text-grey-7 q-mt-lg">
-              Main Material
-            </div>
-
-            <div>
-              Cotton
-            </div>
-
-          </div>
-
-
-          <div class="col-12 col-md-6">
-
-            <div class="text-grey-7">
-              SKU
-            </div>
-
-            <div>
-              266123990_BD
-            </div>
-
-
-            <div class="text-grey-7 q-mt-lg">
-              What's in the box
-            </div>
-
-            <div>
-              1 Piece Multicolor Random Trouser For Men
-            </div>
-
-          </div>
-
-        </div>
-
-      </q-card>
-
-
-      <!-- ================================================= -->
-      <!-- RATINGS -->
-      <!-- ================================================= -->
-
-      <q-card flat class="bg-white q-mt-md">
-
-        <div class="section-title">
-          Ratings & Reviews
-        </div>
-
-        <q-separator />
-
-
-        <div class="row q-pa-xl">
-
-          <!-- OVERALL RATING -->
-
-          <div class="col-12 col-md-4 text-center">
-
-            <div class="big-rating">
-              4.1
-              <span>/5</span>
-            </div>
-
-            <q-rating
-              :model-value="4"
-              color="orange"
-              size="35px"
-              readonly
-            />
-
-            <div class="text-grey-7">
-              96 Ratings
-            </div>
-
-          </div>
-
-
-          <!-- RATING BREAKDOWN -->
-
-          <div class="col-12 col-md-6">
-
-            <div
-              v-for="item in ratingBreakdown"
-              :key="item.star"
-              class="row items-center q-mb-sm"
-            >
-
-              <q-rating
-                :model-value="item.star"
-                color="orange"
-                size="20px"
-                readonly
-              />
-
-              <q-linear-progress
-                :value="item.value"
-                color="orange"
-                track-color="grey-3"
-                class="rating-bar q-ml-md"
-              />
-
-              <span class="q-ml-md">
-                {{ item.count }}
-              </span>
+              <div class="text-weight-bold">
+                BDT
+              </div>
 
             </div>
 
           </div>
 
-        </div>
+        </template>
 
 
-        <q-separator />
+        <q-list style="min-width: 190px;">
+
+          <q-item clickable v-close-popup>
+            <q-item-section>
+              English / BDT
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-close-popup>
+            <q-item-section>
+              English / USD
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-close-popup>
+            <q-item-section>
+              বাংলা / BDT
+            </q-item-section>
+          </q-item>
+
+        </q-list>
+
+      </q-btn-dropdown>
 
 
-        <!-- REVIEW HEADER -->
-
-        <div class="row items-center q-pa-md">
-
-          <div class="text-h6">
-            Product Reviews
-          </div>
-
-          <q-space />
-
-
-          <q-select
-            v-model="reviewSort"
-            :options="reviewSortOptions"
-            dense
-            outlined
-            label="Sort"
-            style="width: 170px"
-          />
-
-
-          <q-select
-            v-model="reviewFilter"
-            :options="reviewFilterOptions"
-            dense
-            outlined
-            label="Filter"
-            class="q-ml-sm"
-            style="width: 150px"
-          />
-
-        </div>
-
-
-        <!-- REVIEWS -->
+      <!-- ==================================================
+           ACCOUNT + POPUP
+      =================================================== -->
+      <q-btn
+        flat
+        no-caps
+        padding="4px 8px"
+        style="color: #111;"
+      >
 
         <div
-          v-for="review in filteredReviews"
-          :key="review.id"
-          class="review q-pa-lg"
+          class="row items-center no-wrap"
+          style="gap: 8px; white-space: nowrap;"
         >
 
-          <q-rating
-            :model-value="review.rating"
-            color="orange"
-            readonly
-          />
-
-          <div class="text-grey-7">
-            {{ review.name }}
-          </div>
-
-          <div class="q-mt-md text-body1">
-            {{ review.comment }}
-          </div>
-
-          <div class="text-grey-6 q-mt-md">
-            Helpful: {{ review.helpful }}
-          </div>
-
-        </div>
-
-
-        <div
-          v-if="filteredReviews.length === 0"
-          class="text-center text-grey-6 q-pa-xl"
-        >
-          No reviews found.
-        </div>
-
-
-        <!-- WRITE REVIEW -->
-
-        <q-separator />
-
-        <div class="q-pa-lg">
-
-          <div class="text-h6 q-mb-md">
-            Rate this product
-          </div>
-
-          <q-rating
-            v-model="userRating"
-            color="orange"
+          <q-icon
+            name="person_outline"
             size="32px"
           />
 
-          <q-input
-            v-model="userReview"
-            outlined
-            type="textarea"
-            label="Write your review"
-            class="q-mt-md"
-          />
+          <div style="text-align: left;">
 
-          <q-btn
-            color="primary"
-            label="Submit Review"
-            no-caps
-            class="q-mt-md"
-            @click="submitReview"
-          />
+            <div style="font-size: 11px;">
+              Welcome
+            </div>
 
-        </div>
-
-      </q-card>
-
-
-      <!-- ================================================= -->
-      <!-- QUESTIONS -->
-      <!-- ================================================= -->
-
-      <q-card flat class="bg-white q-mt-md">
-
-        <div class="section-title">
-          Questions about this product ({{ questions.length }})
-        </div>
-
-        <q-separator />
-
-
-        <div class="q-pa-lg">
-
-          <div class="text-primary">
-
-            Login or Register
-
-            <span class="text-dark">
-              to ask questions
-            </span>
+            <div
+              class="text-weight-bold"
+              style="font-size: 13px;"
+            >
+              Sign in / Register
+            </div>
 
           </div>
 
-
-          <div class="text-h6 q-mt-lg">
-            Other questions answered by LIFE STYLE
-          </div>
+        </div>
 
 
-          <div
-            v-for="question in questions"
-            :key="question.id"
-            class="question q-mt-lg"
+        <q-menu
+          anchor="bottom middle"
+          self="top middle"
+          :offset="[0, 10]"
+        >
+
+          <q-card
+            style="
+              width: 270px;
+              border-radius: 18px;
+              padding: 14px;
+              box-shadow: 0 6px 25px rgba(0,0,0,0.18);
+            "
           >
 
-            <div class="question-icon">
-              Q
-            </div>
+            <q-btn
+              unelevated
+              rounded
+              color="dark"
+              label="Sign in"
+              no-caps
+              class="full-width"
+            />
+
+            <q-btn
+              flat
+              no-caps
+              label="Register"
+              class="full-width"
+              style="font-size: 12px; color: #666;"
+            />
+
+            <q-separator class="q-mb-sm" />
 
 
-            <div class="full-width">
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="receipt_long" size="18px" />
+              </q-item-section>
 
-              <div class="question-text">
-                {{ question.question }}
-              </div>
-
-              <div class="text-grey-6">
-                {{ question.date }}
-              </div>
-
-
-              <div class="answer q-mt-md">
-
-                <span class="answer-icon">
-                  A
-                </span>
-
-                {{ question.answer }}
-
-              </div>
-
-            </div>
-
-          </div>
+              <q-item-section>
+                My Orders
+              </q-item-section>
+            </q-item>
 
 
-          <!-- ASK QUESTION -->
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="paid" size="18px" />
+              </q-item-section>
 
-          <q-input
-            v-model="newQuestion"
-            outlined
-            label="Ask a question"
-            class="q-mt-xl"
+              <q-item-section>
+                My Coins
+              </q-item-section>
+            </q-item>
+
+
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="mail_outline" size="18px" />
+              </q-item-section>
+
+              <q-item-section>
+                Message Center
+              </q-item-section>
+            </q-item>
+
+
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="credit_card" size="18px" />
+              </q-item-section>
+
+              <q-item-section>
+                Payment
+              </q-item-section>
+            </q-item>
+
+
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="favorite_border" size="18px" />
+              </q-item-section>
+
+              <q-item-section>
+                Wish List
+              </q-item-section>
+            </q-item>
+
+
+            <q-item clickable dense>
+              <q-item-section avatar>
+                <q-icon name="local_offer" size="18px" />
+              </q-item-section>
+
+              <q-item-section>
+                My Coupons
+              </q-item-section>
+            </q-item>
+
+
+            <q-separator class="q-my-sm" />
+
+
+            <q-item clickable dense>
+              <q-item-section>Settings</q-item-section>
+            </q-item>
+
+            <q-item clickable dense>
+              <q-item-section>
+                AliExpress Business
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable dense>
+              <q-item-section>DS Center</q-item-section>
+            </q-item>
+
+            <q-item clickable dense>
+              <q-item-section>Seller Log In</q-item-section>
+            </q-item>
+
+            <q-item clickable dense>
+              <q-item-section>
+                Return & refund policy
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable dense>
+              <q-item-section>
+                Help Center
+              </q-item-section>
+            </q-item>
+
+          </q-card>
+
+        </q-menu>
+
+      </q-btn>
+
+
+      <!-- CART -->
+      <div
+        class="row items-center no-wrap"
+        style="gap: 8px;"
+      >
+
+        <div style="position: relative;">
+
+          <q-icon
+            name="shopping_cart"
+            size="34px"
           />
 
-          <q-btn
-            color="primary"
-            label="Submit Question"
-            no-caps
-            class="q-mt-md"
-            @click="submitQuestion"
+          <q-badge
+            floating
+            rounded
+            color="dark"
+            label="0"
           />
 
         </div>
 
-      </q-card>
-
-
-      <!-- ================================================= -->
-      <!-- FOOTER -->
-      <!-- ================================================= -->
-
-      <div class="footer q-pa-xl q-mt-md">
-
-        <div class="text-h6">
-          My Shop
-        </div>
-
-        <div class="text-grey-7 q-mt-sm">
-          Quality products at affordable prices.
+        <div class="text-weight-bold">
+          Cart
         </div>
 
       </div>
@@ -1150,2057 +349,1956 @@
     </div>
 
 
-    <!-- ================================================= -->
-    <!-- IMAGE PREVIEW -->
-    <!-- ================================================= -->
 
-    <q-dialog
-      v-model="imagePreview"
-      maximized
-      transition-show="fade"
-      transition-hide="fade"
+    <!-- ==================================================
+         NAVBAR
+    =================================================== -->
+    <div
+      class="row items-center no-wrap"
+      style="
+        width: 100%;
+        min-height: 65px;
+        padding: 0 4%;
+        gap: 14px;
+        overflow-x: auto;
+      "
     >
 
-      <q-card class="preview-card">
+      <q-btn-dropdown
+        unelevated
+        rounded
+        no-caps
+        color="grey-2"
+        text-color="black"
+        icon="menu"
+        label="All Categories"
+        style="min-width: 280px;"
+      >
 
-        <q-btn
-          round
-          flat
-          icon="close"
-          color="white"
-          class="preview-close"
-          @click="imagePreview = false"
-        />
+        <q-list style="min-width: 310px;">
 
+          <q-item
+            v-for="item in categories"
+            :key="item.name"
+            clickable
+            v-close-popup
+          >
 
-        <q-btn
-          round
-          flat
-          icon="chevron_left"
-          color="white"
-          size="28px"
-          class="preview-left"
-          @click="previousImage"
-        />
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
 
+            <q-item-section>
+              {{ item.name }}
+            </q-item-section>
 
-        <q-img
-          :src="selectedImage"
-          fit="contain"
-          class="preview-image"
-        />
+          </q-item>
 
+        </q-list>
 
-        <q-btn
-          round
-          flat
-          icon="chevron_right"
-          color="white"
-          size="28px"
-          class="preview-right"
-          @click="nextImage"
-        />
+      </q-btn-dropdown>
 
 
-        <div class="preview-count">
-          {{ currentImageIndex + 1 }}
-          /
-          {{ productImages.length }}
+      <q-btn
+        flat
+        no-caps
+        color="negative"
+        label="SuperDeals"
+        class="text-weight-bold"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="AliExpress Business"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="Automotive"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="Appliances"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="Women's Clothing"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="Men's Clothing"
+      />
+
+      <q-btn
+        flat
+        no-caps
+        label="Toys & Games"
+      />
+
+
+      <q-btn-dropdown
+        flat
+        no-caps
+        label="More"
+      >
+
+        <q-list>
+
+          <q-item clickable v-close-popup>
+            <q-item-section>Shoes</q-item-section>
+          </q-item>
+
+          <q-item clickable v-close-popup>
+            <q-item-section>Electronics</q-item-section>
+          </q-item>
+
+          <q-item clickable v-close-popup>
+            <q-item-section>Jewelry</q-item-section>
+          </q-item>
+
+        </q-list>
+
+      </q-btn-dropdown>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         MAIN CAROUSEL
+    =================================================== -->
+    <q-carousel
+      v-model="slide"
+      animated
+      arrows
+      navigation
+      infinite
+      :autoplay="4000"
+      swipeable
+      style="
+        width: 100%;
+        height: 360px;
+        background: #ffe0a3;
+      "
+    >
+
+      <q-carousel-slide
+        v-for="item in saleSlides"
+        :key="item.name"
+        :name="item.name"
+        class="q-pa-none"
+      >
+
+        <div
+          style="
+            width: 100%;
+            height: 100%;
+            padding: 32px 8%;
+            background: #ffe0a3;
+          "
+        >
+
+          <!-- TITLE -->
+          <div
+            class="row items-center"
+            style="margin-bottom: 20px;"
+          >
+
+            <span
+              style="
+                font-family: Georgia, serif;
+                font-style: italic;
+                font-size: 48px;
+                font-weight: bold;
+                color: #b94d00;
+              "
+            >
+              {{ item.firstTitle }}
+            </span>
+
+            <span
+              style="
+                font-size: 52px;
+                font-weight: 900;
+                color: #ff6500;
+                margin-left: 10px;
+              "
+            >
+              {{ item.secondTitle }}
+            </span>
+
+            <q-btn
+              round
+              dense
+              unelevated
+              color="orange-9"
+              icon="chevron_right"
+              class="q-ml-sm"
+            />
+
+          </div>
+
+
+          <div class="row no-wrap" style="gap: 16px;">
+
+            <!-- COUPONS -->
+            <div
+              class="row no-wrap"
+              style="
+                background: white;
+                border: 4px solid #ffd1d8;
+              "
+            >
+
+              <div
+                v-for="coupon in item.coupons"
+                :key="coupon.code"
+                style="
+                  width: 180px;
+                  height: 145px;
+                  padding: 18px 10px;
+                  text-align: center;
+                  border-right: 2px dashed #ffd1d8;
+                "
+              >
+
+                <div
+                  style="
+                    font-size: 22px;
+                    font-weight: 800;
+                    color: #ff3156;
+                  "
+                >
+                  {{ coupon.discount }}
+                </div>
+
+                <div
+                  style="
+                    margin: 10px 0 20px;
+                    color: #ff5f79;
+                    font-size: 13px;
+                  "
+                >
+                  {{ coupon.order }}
+                </div>
+
+                <div
+                  style="
+                    color: #ff1744;
+                    font-size: 12px;
+                    font-weight: 700;
+                  "
+                >
+                  Code: {{ coupon.code }}
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- PROMO -->
+            <div
+              class="row no-wrap"
+              style="
+                width: 300px;
+                height: 149px;
+                background: #ffcaca;
+              "
+            >
+
+              <q-img
+                :src="item.image"
+                style="
+                  width: 145px;
+                  height: 149px;
+                "
+                fit="cover"
+              />
+
+              <div
+                style="
+                  flex: 1;
+                  padding: 14px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: space-between;
+                "
+              >
+
+                <div
+                  style="
+                    font-size: 17px;
+                    font-weight: 700;
+                    color: #ff6565;
+                  "
+                >
+                  {{ item.title }}
+                </div>
+
+                <div
+                  style="
+                    background: #4d4141;
+                    color: white;
+                    padding: 6px;
+                    width: fit-content;
+                    font-weight: bold;
+                  "
+                >
+                  {{ item.price }}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
 
-      </q-card>
+      </q-carousel-slide>
 
-    </q-dialog>
-
-
-    <!-- ================================================= -->
-    <!-- CART -->
-    <!-- ================================================= -->
-
-    <q-dialog v-model="cartDialog">
-
-      <q-card class="cart-dialog">
-
-        <q-card-section>
-
-          <div class="text-h6">
-            Shopping Cart
-          </div>
-
-        </q-card-section>
+    </q-carousel>
 
 
-        <q-separator />
 
-
-        <q-card-section>
-
-          <div
-            v-if="cartQuantity > 0"
-            class="row items-center"
-          >
-
-            <q-img
-              :src="selectedImage"
-              width="90px"
-              height="90px"
-              fit="contain"
-            />
-
-            <div class="q-ml-md">
-
-              <div class="text-weight-bold">
-                Stylish Full Check Trouser
-              </div>
-
-              <div class="text-grey-7">
-                Size: {{ selectedSize }}
-              </div>
-
-              <div class="text-grey-7">
-                Color: {{ selectedColor }}
-              </div>
-
-              <div>
-                Quantity: {{ cartQuantity }}
-              </div>
-
-              <div class="text-orange text-h6">
-                ৳ {{ cartTotal }}
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div
-            v-else
-            class="text-center text-grey-6 q-pa-lg"
-          >
-            Your cart is empty.
-          </div>
-
-        </q-card-section>
-
-
-        <q-separator />
-
-
-        <q-card-actions align="right">
-
-          <q-btn
-            flat
-            label="Close"
-            v-close-popup
-          />
-
-          <q-btn
-            v-if="cartQuantity > 0"
-            flat
-            color="negative"
-            label="Remove"
-            @click="removeFromCart"
-          />
-
-          <q-btn
-            v-if="cartQuantity > 0"
-            color="orange"
-            label="Checkout"
-            no-caps
-            @click="openCheckoutFromCart"
-          />
-
-        </q-card-actions>
-
-      </q-card>
-
-    </q-dialog>
-
-
-    <!-- ================================================= -->
-    <!-- CHECKOUT -->
-    <!-- ================================================= -->
-
-    <q-dialog
-      v-model="checkoutDialog"
-      persistent
+    <!-- SHIPPING -->
+    <div
+      class="row items-center justify-center"
+      style="
+        min-height: 45px;
+        gap: 6px;
+        background: #f6f6f6;
+      "
     >
 
-      <q-card class="checkout-dialog">
+      <q-icon
+        name="local_shipping"
+        color="brown"
+      />
 
-        <q-card-section>
+      <b>Free shipping</b>
 
-          <div class="text-h6">
-            Checkout
+      <span>
+        On all Choice items
+      </span>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         TODAY'S DEALS
+    =================================================== -->
+    <div
+      style="
+        max-width: 1100px;
+        margin: auto;
+        padding: 28px 20px 45px;
+      "
+    >
+
+      <div
+        class="text-h5 text-weight-bold text-center q-mb-lg"
+      >
+        Today's deals
+      </div>
+
+
+      <div class="row q-col-gutter-lg">
+
+        <!-- BUNDLE -->
+        <div class="col-12 col-md-6">
+
+          <q-card
+            flat
+            bordered
+            style="padding: 18px;"
+          >
+
+            <div
+              class="text-h6 text-weight-bold text-center"
+            >
+              Bundle deals
+            </div>
+
+
+            <div class="text-center q-my-sm">
+
+              <q-badge
+                rounded
+                color="orange-2"
+                text-color="black"
+                style="padding: 6px 15px;"
+              >
+                🛍️ 3 from US $2.99
+              </q-badge>
+
+            </div>
+
+
+            <div class="row q-col-gutter-md">
+
+              <div
+                v-for="product in bundleProducts"
+                :key="product.name"
+                class="col-4"
+              >
+
+                <q-card flat>
+
+                  <q-img
+                    :src="product.image"
+                    ratio="1"
+                    fit="cover"
+                  />
+
+                  <div
+                    style="
+                      margin-top: 7px;
+                      font-size: 12px;
+                      min-height: 34px;
+                    "
+                  >
+                    {{ product.name }}
+                  </div>
+
+                  <div
+                    style="
+                      color: #e60012;
+                      font-size: 16px;
+                      font-weight: 800;
+                    "
+                  >
+                    {{ product.price }}
+                  </div>
+
+                  <div
+                    style="
+                      color: #888;
+                      font-size: 10px;
+                      text-decoration: line-through;
+                    "
+                  >
+                    {{ product.oldPrice }}
+                  </div>
+
+                  <div style="font-size: 10px;">
+
+                    <q-icon
+                      name="star"
+                      color="orange"
+                    />
+
+                    {{ product.rating }}
+
+                    | {{ product.sold }} sold
+
+                  </div>
+
+                </q-card>
+
+              </div>
+
+            </div>
+
+          </q-card>
+
+        </div>
+
+
+        <!-- SUPER DEALS -->
+        <div class="col-12 col-md-6">
+
+          <q-card
+            flat
+            bordered
+            style="padding: 18px;"
+          >
+
+            <div
+              class="text-h6 text-weight-bold text-center"
+            >
+              SuperDeals
+            </div>
+
+
+            <div class="text-center q-my-sm">
+
+              <q-badge
+                rounded
+                color="red-1"
+                text-color="negative"
+                style="padding: 6px 15px;"
+              >
+                🔥 Limited time deals
+              </q-badge>
+
+            </div>
+
+
+            <div class="row q-col-gutter-md">
+
+              <div
+                v-for="product in superProducts"
+                :key="product.name"
+                class="col-4"
+              >
+
+                <q-card flat>
+
+                  <q-img
+                    :src="product.image"
+                    ratio="1"
+                    fit="cover"
+                  />
+
+                  <div
+                    style="
+                      margin-top: 7px;
+                      font-size: 12px;
+                      min-height: 34px;
+                    "
+                  >
+                    {{ product.name }}
+                  </div>
+
+                  <div
+                    style="
+                      color: #e60012;
+                      font-size: 16px;
+                      font-weight: 800;
+                    "
+                  >
+                    {{ product.price }}
+                  </div>
+
+                  <div
+                    style="
+                      color: #888;
+                      font-size: 10px;
+                      text-decoration: line-through;
+                    "
+                  >
+                    {{ product.oldPrice }}
+                  </div>
+
+                  <q-badge
+                    color="negative"
+                    class="q-mt-xs"
+                  >
+                    {{ product.discount }}
+                  </q-badge>
+
+                </q-card>
+
+              </div>
+
+            </div>
+
+          </q-card>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         SUPER BUYER
+    =================================================== -->
+    <div
+      style="
+        max-width: 1160px;
+        margin: 0 auto 55px;
+        padding: 0 20px;
+      "
+    >
+
+      <div
+        style="
+          min-height: 430px;
+          position: relative;
+          overflow: hidden;
+          background-image:
+            linear-gradient(
+              rgba(0,0,0,.42),
+              rgba(0,0,0,.42)
+            ),
+            url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=85');
+          background-size: cover;
+          background-position: center;
+        "
+      >
+
+        <!-- TOP -->
+        <div
+          style="
+            position: relative;
+            z-index: 2;
+            padding: 28px 30px;
+            color: white;
+          "
+        >
+
+          <div
+            style="
+              font-size: 27px;
+              font-weight: 800;
+              font-style: italic;
+            "
+          >
+            SuperBuyer
           </div>
 
-          <div class="text-grey-7">
-            Complete your order information
+
+          <div
+            class="row"
+            style="
+              gap: 17px;
+              font-size: 11px;
+              margin: 8px 0 18px;
+            "
+          >
+
+            <span>
+              ◆ Tax exemptions
+            </span>
+
+            <span>
+              ◈ Express payment
+            </span>
+
+            <span>
+              ● Financial support
+            </span>
+
           </div>
 
-        </q-card-section>
+
+          <q-btn
+            unelevated
+            color="white"
+            text-color="black"
+            no-caps
+            label="Shop now"
+          />
 
 
-        <q-separator />
+          <!-- STATS -->
+          <div
+            class="row"
+            style="
+              position: absolute;
+              right: 40px;
+              top: 30px;
+              gap: 60px;
+            "
+          >
+
+            <div
+              style="
+                padding-left: 10px;
+                border-left: 2px solid rgba(255,255,255,.6);
+              "
+            >
+
+              <div
+                style="
+                  font-size: 22px;
+                  font-weight: bold;
+                "
+              >
+                5M+
+              </div>
+
+              <small>
+                Factory direct supply
+              </small>
 
 
-        <q-form @submit="placeOrder">
-
-          <q-card-section>
+              <div style="height: 16px;"></div>
 
 
-            <div class="text-subtitle1 text-weight-bold">
-              Customer Information
+              <div
+                style="
+                  font-size: 22px;
+                  font-weight: bold;
+                "
+              >
+                10
+              </div>
+
+              <small>
+                Local warehouses worldwide
+              </small>
+
             </div>
 
 
-            <q-input
-              v-model="checkout.name"
-              outlined
-              label="Full Name"
-              :rules="[
-                value =>
-                  !!value ||
-                  'Name is required'
-              ]"
-              class="q-mt-md"
-            />
+            <div
+              style="
+                padding-left: 10px;
+                border-left: 2px solid rgba(255,255,255,.6);
+              "
+            >
+
+              <div
+                style="
+                  font-size: 22px;
+                  font-weight: bold;
+                "
+              >
+                20M+
+              </div>
+
+              <small>
+                Value dropshipping items
+              </small>
 
 
-            <q-input
-              v-model="checkout.phone"
-              outlined
-              label="Phone Number"
-              type="tel"
-              :rules="[
-                value =>
-                  !!value ||
-                  'Phone is required'
-              ]"
-              class="q-mt-md"
-            />
+              <div style="height: 16px;"></div>
 
 
-            <q-input
-              v-model="checkout.address"
-              outlined
-              label="Delivery Address"
-              type="textarea"
-              :rules="[
-                value =>
-                  !!value ||
-                  'Address is required'
-              ]"
-              class="q-mt-md"
-            />
+              <div
+                style="
+                  font-size: 22px;
+                  font-weight: bold;
+                "
+              >
+                24H
+              </div>
 
+              <small>
+                Personalized sourcing service
+              </small>
 
-            <div class="text-subtitle1 text-weight-bold q-mt-lg">
-              Delivery Method
             </div>
 
+          </div>
 
-            <q-option-group
-              v-model="checkout.delivery"
-              :options="deliveryOptions"
-              color="primary"
-              class="q-mt-sm"
-            />
+        </div>
 
 
-            <div class="text-subtitle1 text-weight-bold q-mt-lg">
-              Payment Method
-            </div>
+        <!-- PRODUCT BOXES -->
+        <div
+          class="row q-col-gutter-lg"
+          style="
+            position: absolute;
+            left: 28px;
+            right: 28px;
+            bottom: 28px;
+            z-index: 5;
+          "
+        >
 
-
-            <q-option-group
-              v-model="checkout.payment"
-              :options="paymentOptions"
-              color="orange"
-              class="q-mt-sm"
-            />
-
-
-            <!-- ORDER SUMMARY -->
+          <!-- BULK SAVER -->
+          <div class="col-6">
 
             <q-card
               flat
-              bordered
-              class="q-mt-lg bg-grey-1"
+              style="
+                background: white;
+                padding: 12px;
+              "
             >
 
-              <q-card-section>
-
-                <div class="text-subtitle1 text-weight-bold">
-                  Order Summary
-                </div>
-
-
-                <div class="row justify-between q-mt-md">
-
-                  <span>
-                    Product
-                  </span>
-
-                  <span>
-                    ৳ {{ productPrice }}
-                  </span>
-
-                </div>
+              <div
+                class="text-center text-weight-bold"
+                style="
+                  font-size: 17px;
+                  margin-bottom: 10px;
+                "
+              >
+                Bulk Saver Hub
+              </div>
 
 
-                <div class="row justify-between q-mt-sm">
+              <div class="row q-col-gutter-md">
 
-                  <span>
-                    Quantity
-                  </span>
+                <div
+                  v-for="item in bulkSaverProducts"
+                  :key="item.name"
+                  class="col-4"
+                >
 
-                  <span>
-                    {{ quantity }}
-                  </span>
+                  <q-img
+                    :src="item.image"
+                    ratio="1"
+                    fit="cover"
+                  />
 
-                </div>
+                  <div
+                    style="
+                      font-size: 14px;
+                      font-weight: bold;
+                      margin-top: 6px;
+                    "
+                  >
+                    {{ item.price }}
 
+                    <span
+                      style="
+                        color: #777;
+                        font-size: 9px;
+                        text-decoration: line-through;
+                      "
+                    >
+                      {{ item.oldPrice }}
+                    </span>
 
-                <div class="row justify-between q-mt-sm">
+                  </div>
 
-                  <span>
-                    Delivery
-                  </span>
-
-                  <span>
-                    ৳ {{ deliveryCharge }}
-                  </span>
-
-                </div>
-
-
-                <q-separator class="q-my-md" />
-
-
-                <div class="row justify-between">
-
-                  <span class="text-weight-bold">
-                    Total
-                  </span>
-
-                  <span class="text-h6 text-orange">
-                    ৳ {{ checkoutTotal }}
-                  </span>
+                  <div style="font-size: 9px;">
+                    {{ item.tag }}
+                  </div>
 
                 </div>
 
-              </q-card-section>
+              </div>
 
             </q-card>
 
-          </q-card-section>
+          </div>
 
 
-          <q-separator />
+          <!-- BUY AGAIN -->
+          <div class="col-6">
+
+            <q-card
+              flat
+              style="
+                background: white;
+                padding: 12px;
+              "
+            >
+
+              <div
+                class="text-center text-weight-bold"
+                style="
+                  font-size: 17px;
+                  margin-bottom: 10px;
+                "
+              >
+                Buy again
+              </div>
 
 
-          <q-card-actions align="right">
+              <div class="row q-col-gutter-md">
+
+                <div
+                  v-for="item in buyAgainProducts"
+                  :key="item.name"
+                  class="col-4"
+                >
+
+                  <q-img
+                    :src="item.image"
+                    ratio="1"
+                    fit="cover"
+                  />
+
+                  <div
+                    style="
+                      font-size: 14px;
+                      font-weight: bold;
+                      margin-top: 6px;
+                    "
+                  >
+                    {{ item.price }}
+
+                    <span
+                      style="
+                        color: #777;
+                        font-size: 9px;
+                        text-decoration: line-through;
+                      "
+                    >
+                      {{ item.oldPrice }}
+                    </span>
+
+                  </div>
+
+                  <div style="font-size: 9px;">
+                    {{ item.tag }}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </q-card>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         SHOP BY CATEGORY
+    =================================================== -->
+    <div
+      style="
+        max-width: 1160px;
+        margin: auto;
+        padding: 0 20px 25px;
+      "
+    >
+
+      <div
+        class="text-h5 text-weight-bold text-center"
+        style="margin-bottom: 18px;"
+      >
+        Shop by category
+      </div>
+
+
+      <div class="row q-col-gutter-lg">
+
+        <!-- LEFT VIVA -->
+        <div class="col-12 col-md-6">
+
+          <div
+            style="
+              height: 455px;
+              padding: 25px 32px;
+              background: #a9eff8;
+              position: relative;
+              overflow: hidden;
+            "
+          >
+
+            <div
+              style="
+                position: relative;
+                z-index: 4;
+              "
+            >
+
+              <div
+                style="
+                  font-family: Georgia, serif;
+                  font-size: 32px;
+                  font-style: italic;
+                  font-weight: 800;
+                "
+              >
+                Viva
+              </div>
+
+              <div
+                style="
+                  font-size: 12px;
+                  margin: 6px 0 14px;
+                "
+              >
+                Your fashion choice
+              </div>
+
+              <q-btn
+                unelevated
+                color="black"
+                text-color="white"
+                label="Shop now"
+                no-caps
+                style="
+                  border-radius: 0;
+                  padding: 6px 18px;
+                "
+              />
+
+            </div>
+
+
+            <!-- BIG IMAGE -->
+            <q-img
+              src="https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=700&q=85"
+              style="
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 54%;
+                height: 230px;
+              "
+              fit="cover"
+            />
+
+
+            <!-- PRODUCTS -->
+            <div
+              class="row q-col-gutter-sm"
+              style="
+                position: absolute;
+                left: 32px;
+                right: 32px;
+                bottom: 27px;
+                z-index: 4;
+              "
+            >
+
+              <div
+                v-for="item in fashionCategoryProducts"
+                :key="item.name"
+                class="col-4"
+              >
+
+                <q-card
+                  flat
+                  square
+                  style="
+                    padding: 5px;
+                    background: white;
+                  "
+                >
+
+                  <q-img
+                    :src="item.image"
+                    style="
+                      width: 100%;
+                      height: 180px;
+                    "
+                    fit="cover"
+                  />
+
+
+                  <div
+                    style="
+                      font-size: 13px;
+                      font-weight: 800;
+                      margin-top: 7px;
+                    "
+                  >
+                    {{ item.price }}
+
+                    <span
+                      style="
+                        font-size: 9px;
+                        color: #777;
+                        text-decoration: line-through;
+                      "
+                    >
+                      {{ item.oldPrice }}
+                    </span>
+
+                  </div>
+
+
+                  <div style="font-size: 9px;">
+
+                    <q-icon
+                      name="star"
+                      color="orange"
+                    />
+
+                    {{ item.rating }}
+
+                    |
+                    {{ item.sold }} sold
+
+                  </div>
+
+                </q-card>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RIGHT CATEGORY GRID -->
+        <div class="col-12 col-md-6">
+
+          <div class="row q-col-gutter-md">
+
+            <div
+              v-for="category in shopCategories"
+              :key="category.name"
+              class="col-6"
+            >
+
+              <q-card
+                flat
+                square
+                style="
+                  height: 142px;
+                  background: #f4f4f4;
+                  position: relative;
+                  overflow: hidden;
+                  cursor: pointer;
+                "
+              >
+
+                <div
+                  style="
+                    position: absolute;
+                    left: 16px;
+                    top: 17px;
+                    z-index: 3;
+                    font-size: 17px;
+                    line-height: 18px;
+                    font-weight: 700;
+                    width: 110px;
+                  "
+                >
+                  {{ category.name }}
+                </div>
+
+
+                <q-img
+                  :src="category.image"
+                  style="
+                    position: absolute;
+                    right: 0;
+                    bottom: 0;
+                    width: 60%;
+                    height: 100%;
+                  "
+                  fit="contain"
+                />
+
+              </q-card>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         MORE TO LOVE
+    =================================================== -->
+    <div
+      style="
+        max-width: 1160px;
+        margin: auto;
+        padding: 0 20px 60px;
+      "
+    >
+
+      <div
+        class="text-h5 text-weight-bold text-center"
+        style="margin: 10px 0 18px;"
+      >
+        More to love
+      </div>
+
+
+      <div class="row q-col-gutter-md">
+
+        <div
+          v-for="product in moreLoveProducts"
+          :key="product.name"
+          class="col-6 col-sm-4 col-md-2"
+        >
+
+          <q-card
+            flat
+            style="
+              cursor: pointer;
+              position: relative;
+            "
+          >
+
+            <q-img
+              :src="product.image"
+              style="
+                width: 100%;
+                height: 180px;
+                background: #f5f5f5;
+              "
+              fit="cover"
+            />
+
 
             <q-btn
-              flat
-              label="Cancel"
-              color="grey"
-              type="button"
-              @click="
-                checkoutDialog = false
+              round
+              unelevated
+              color="white"
+              text-color="black"
+              icon="add_shopping_cart"
+              size="sm"
+              style="
+                position: absolute;
+                right: 7px;
+                top: 145px;
+                z-index: 5;
               "
             />
 
-            <q-btn
-              unelevated
-              label="Place Order"
-              color="orange"
-              type="submit"
-            />
 
-          </q-card-actions>
-
-        </q-form>
-
-      </q-card>
-
-    </q-dialog>
+            <div
+              style="
+                font-size: 10px;
+                margin-top: 7px;
+                height: 28px;
+                overflow: hidden;
+              "
+            >
+              {{ product.name }}
+            </div>
 
 
-    <!-- ================================================= -->
-    <!-- CHANGE ADDRESS -->
-    <!-- ================================================= -->
+            <div
+              style="
+                color: #e60012;
+                font-size: 16px;
+                font-weight: 800;
+              "
+            >
+              {{ product.price }}
 
-    <q-dialog v-model="addressDialog">
+              <span
+                style="
+                  color: #888;
+                  font-size: 9px;
+                  text-decoration: line-through;
+                "
+              >
+                {{ product.oldPrice }}
+              </span>
 
-      <q-card class="address-dialog">
+            </div>
 
-        <q-card-section>
 
-          <div class="text-h6">
-            Change Delivery Address
+            <div
+              style="
+                font-size: 9px;
+                margin-top: 4px;
+              "
+            >
+
+              <q-icon
+                name="star"
+                color="orange"
+              />
+
+              {{ product.rating }}
+
+              | {{ product.sold }} sold
+
+            </div>
+
+
+            <div
+              style="
+                color: #e60012;
+                font-size: 9px;
+                margin-top: 3px;
+              "
+            >
+              {{ product.deal }}
+            </div>
+
+          </q-card>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         FOOTER INFORMATION
+    =================================================== -->
+    <div
+      style="
+        width: 100%;
+        background: white;
+        border-top: 1px solid #eeeeee;
+      "
+    >
+
+      <div
+        style="
+          max-width: 1500px;
+          margin: auto;
+          padding: 28px 20px 38px;
+        "
+      >
+
+        <div class="row q-col-gutter-xl">
+
+          <!-- ================= LEFT COLUMN ================= -->
+          <div class="col-12 col-md-6">
+
+            <!-- HELP -->
+            <div style="margin-bottom: 30px;">
+
+              <div
+                style="
+                  font-size: 16px;
+                  font-weight: 700;
+                  margin-bottom: 9px;
+                  color: #222;
+                "
+              >
+                Help
+              </div>
+
+              <div
+                style="
+                  color: #666;
+                  font-size: 14px;
+                  line-height: 19px;
+                "
+              >
+                Help Center, Disputes & Reports, Return&refund policy,
+                Report IPR infringement, DSA/OSA Information,
+                Information and contacts for Brazil, Integrity Compliance,
+                Transparency Center, Submit report (non-registered users),
+                Return Policy
+              </div>
+
+            </div>
+
+
+            <!-- BROWSE CATEGORY -->
+            <div>
+
+              <div
+                style="
+                  font-size: 16px;
+                  font-weight: 700;
+                  margin-bottom: 9px;
+                  color: #222;
+                "
+              >
+                Browse by Category
+              </div>
+
+              <div
+                style="
+                  color: #666;
+                  font-size: 14px;
+                  line-height: 19px;
+                "
+              >
+                All Popular, Product, Promotion, Low Price, Great Value,
+                Reviews, Wiki, Blog, Video
+              </div>
+
+            </div>
+
           </div>
 
-        </q-card-section>
+
+          <!-- ================= RIGHT COLUMN ================= -->
+          <div class="col-12 col-md-6">
+
+            <!-- LANGUAGE SITES -->
+            <div style="margin-bottom: 30px;">
+
+              <div
+                style="
+                  font-size: 16px;
+                  font-weight: 700;
+                  margin-bottom: 9px;
+                  color: #222;
+                "
+              >
+                AliExpress Multi-Language Sites
+              </div>
+
+              <div
+                style="
+                  color: #666;
+                  font-size: 14px;
+                  line-height: 19px;
+                "
+              >
+                Russian, Portuguese, Spanish, French, German, Italian,
+                Dutch, Turkish, Japanese, Korean, Thai, Arabic,
+                Hebrew, Polish
+              </div>
+
+            </div>
 
 
-        <q-card-section>
+            <!-- ALIBABA GROUP -->
+            <div>
 
-          <q-input
-            v-model="tempAddress"
-            outlined
-            label="Address"
-          />
+              <div
+                style="
+                  font-size: 16px;
+                  font-weight: 700;
+                  margin-bottom: 9px;
+                  color: #222;
+                "
+              >
+                Alibaba Group
+              </div>
 
-        </q-card-section>
+              <div
+                style="
+                  color: #666;
+                  font-size: 14px;
+                  line-height: 19px;
+                "
+              >
+                Alibaba Group Website, AliExpress, Alimama, Fliggy,
+                Alibaba Cloud, Alibaba International, AliTelecom,
+                DingTalk, Juhuasuan, Taobao Marketplace, Tmall,
+                Taobao Global, AliOS, 1688
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
 
 
-        <q-card-actions align="right">
 
-          <q-btn
-            flat
-            label="Cancel"
-            v-close-popup
-          />
+    <!-- ==================================================
+         FLOATING CART
+    =================================================== -->
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[22, 22]"
+    >
 
-          <q-btn
-            color="primary"
-            label="Save"
-            @click="saveAddress"
-          />
+      <q-btn
+        round
+        color="white"
+        text-color="dark"
+        icon="shopping_cart"
+        size="lg"
+        class="shadow-4"
+      />
 
-        </q-card-actions>
-
-      </q-card>
-
-    </q-dialog>
+    </q-page-sticky>
 
   </q-page>
 </template>
 
 
+
 <script setup>
-
-import {
-  ref,
-  computed,
-  onMounted,
-  onBeforeUnmount
-} from 'vue'
-
-import { useQuasar } from 'quasar'
-
-const $q = useQuasar()
+import { ref } from 'vue'
 
 
-/* ================================================= */
-/* PRODUCT IMAGES */
-/* ================================================= */
+const search = ref('')
+const slide = ref('sale1')
 
-const productImages = [
 
-  '/paint01.jpg',
+/* ==================================================
+   CATEGORIES
+================================================== */
 
-  '/paint01.jpg',
+const categories = [
+  {
+    name: 'Automotive',
+    icon: 'directions_car'
+  },
 
-  '/paint01.jpg',
+  {
+    name: 'Appliances',
+    icon: 'kitchen'
+  },
 
-  '/paint01.jpg',
+  {
+    name: "Women's Clothing",
+    icon: 'checkroom'
+  },
 
-  '/paint01.jpg'
+  {
+    name: "Men's Clothing",
+    icon: 'checkroom'
+  },
 
+  {
+    name: 'Toys & Games',
+    icon: 'sports_esports'
+  },
+
+  {
+    name: 'Furniture',
+    icon: 'chair'
+  },
+
+  {
+    name: 'Beauty & Health',
+    icon: 'health_and_safety'
+  },
+
+  {
+    name: 'Shoes',
+    icon: 'hiking'
+  },
+
+  {
+    name: 'Electronics',
+    icon: 'devices'
+  }
 ]
 
 
-const productPrice = 189
+/* ==================================================
+   SALE SLIDES
+================================================== */
 
+const saleSlides = [
+  {
+    name: 'sale1',
 
-const currentImageIndex = ref(0)
+    firstTitle: 'Fall',
+    secondTitle: 'SALE',
 
-const selectedImage =
-  ref(productImages[0])
+    title: 'Super fashion',
 
-const imagePreview = ref(false)
+    price: '999.99৳',
 
+    image:
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80',
 
-/* ================================================= */
-/* IMAGE FUNCTIONS */
-/* ================================================= */
+    coupons: [
+      {
+        discount: '1,100৳ OFF',
+        order: 'orders 8,500৳+',
+        code: 'OPOCBD09'
+      },
 
-const selectImage = (index) => {
+      {
+        discount: '615৳ OFF',
+        order: 'orders 4,800৳+',
+        code: 'OPOCBD05'
+      },
 
-  currentImageIndex.value = index
-
-  selectedImage.value =
-    productImages[index]
-
-}
-
-
-const nextImage = () => {
-
-  currentImageIndex.value =
-    (
-      currentImageIndex.value + 1
-    ) %
-    productImages.length
-
-  selectedImage.value =
-    productImages[
-      currentImageIndex.value
+      {
+        discount: '250৳ OFF',
+        order: 'orders 1,900৳+',
+        code: 'OPOCBD02'
+      }
     ]
+  },
 
-}
 
+  {
+    name: 'sale2',
 
-const previousImage = () => {
+    firstTitle: 'Mega',
+    secondTitle: 'SALE',
 
-  currentImageIndex.value =
-    (
-      currentImageIndex.value -
-      1 +
-      productImages.length
-    ) %
-    productImages.length
+    title: 'New collection',
 
-  selectedImage.value =
-    productImages[
-      currentImageIndex.value
+    price: '1,250.00৳',
+
+    image:
+      'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80',
+
+    coupons: [
+      {
+        discount: '900৳ OFF',
+        order: 'orders 7,000৳+',
+        code: 'MEGA900'
+      },
+
+      {
+        discount: '500৳ OFF',
+        order: 'orders 4,000৳+',
+        code: 'MEGA500'
+      },
+
+      {
+        discount: '200৳ OFF',
+        order: 'orders 1,500৳+',
+        code: 'MEGA200'
+      }
     ]
-
-}
-
-
-const openImagePreview = () => {
-
-  imagePreview.value = true
-
-}
+  },
 
 
-/* ================================================= */
-/* KEYBOARD */
-/* ================================================= */
+  {
+    name: 'sale3',
 
-const handleKeyboard = (event) => {
+    firstTitle: 'Super',
+    secondTitle: 'DEALS',
 
-  if (!imagePreview.value) {
-    return
+    title: 'Fashion trends',
+
+    price: '1,532.58৳',
+
+    image:
+      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=600&q=80',
+
+    coupons: [
+      {
+        discount: '1,500৳ OFF',
+        order: 'orders 10,000৳+',
+        code: 'SUPER15'
+      },
+
+      {
+        discount: '750৳ OFF',
+        order: 'orders 5,500৳+',
+        code: 'SUPER75'
+      },
+
+      {
+        discount: '350৳ OFF',
+        order: 'orders 2,500৳+',
+        code: 'SUPER35'
+      }
+    ]
   }
-
-  if (event.key === 'ArrowRight') {
-
-    nextImage()
-
-  }
-
-  if (event.key === 'ArrowLeft') {
-
-    previousImage()
-
-  }
-
-  if (event.key === 'Escape') {
-
-    imagePreview.value = false
-
-  }
-
-}
-
-
-onMounted(() => {
-
-  window.addEventListener(
-    'keydown',
-    handleKeyboard
-  )
-
-})
-
-
-onBeforeUnmount(() => {
-
-  window.removeEventListener(
-    'keydown',
-    handleKeyboard
-  )
-
-})
-
-
-/* ================================================= */
-/* COLOR */
-/* ================================================= */
-
-const colors = [
-  'Multicolor'
 ]
 
 
-const selectedColor =
-  ref('Multicolor')
+/* ==================================================
+   TODAY'S DEALS
+================================================== */
 
+const bundleProducts = [
+  {
+    name: "Men's Luxury Silver Watch",
 
-const selectColor = (color) => {
+    image:
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=80',
 
-  selectedColor.value = color
+    price: '600.67৳',
+    oldPrice: '633.06৳',
+    rating: '4.6',
+    sold: '5,000+'
+  },
 
-}
+  {
+    name: 'Modern Running Shoes',
 
+    image:
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80',
 
-/* ================================================= */
-/* SIZE */
-/* ================================================= */
+    price: '766.50৳',
+    oldPrice: '950.00৳',
+    rating: '4.6',
+    sold: '1,000+'
+  },
 
-const sizes = [
+  {
+    name: 'Smart Mobile Phone',
 
-  'S',
+    image:
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=700&q=80',
 
-  '3XL',
-
-  'M',
-
-  'L',
-
-  'XL',
-
-  'XXL',
-
-  'XS'
-
+    price: '14,618৳',
+    oldPrice: '16,000৳',
+    rating: '4.7',
+    sold: '4,000+'
+  }
 ]
 
 
-const selectedSize = ref('M')
-
-
-const selectSize = (size) => {
-
-  selectedSize.value = size
-
-}
-
-
-/* ================================================= */
-/* QUANTITY */
-/* ================================================= */
-
-const quantity = ref(1)
-
-
-const increaseQuantity = () => {
-
-  quantity.value++
-
-}
-
-
-const decreaseQuantity = () => {
-
-  if (quantity.value > 1) {
-
-    quantity.value--
-
-  }
-
-}
-
-
-const subtotal = computed(() => {
-
-  return (
-    productPrice *
-    quantity.value
-  )
-
-})
-
-
-/* ================================================= */
-/* CART */
-/* ================================================= */
-
-const cartQuantity = ref(0)
-
-const cartDialog = ref(false)
-
-
-const cartTotal = computed(() => {
-
-  return (
-    productPrice *
-    cartQuantity.value
-  )
-
-})
-
-
-const addToCart = () => {
-
-  cartQuantity.value +=
-    quantity.value
-
-  cartDialog.value = true
-
-  $q.notify({
-
-    type: 'positive',
-
-    message:
-      'Product added to cart',
-
-    position: 'top'
-
-  })
-
-}
-
-
-const removeFromCart = () => {
-
-  cartQuantity.value = 0
-
-  $q.notify({
-
-    type: 'info',
-
-    message:
-      'Product removed from cart'
-
-  })
-
-}
-
-
-/* ================================================= */
-/* CHECKOUT */
-/* ================================================= */
-
-const checkoutDialog = ref(false)
-
-
-const openCheckoutFromCart = () => {
-
-  cartDialog.value = false
-
-  checkoutDialog.value = true
-
-}
-
-
-const buyNow = () => {
-
-  checkoutDialog.value = true
-
-}
-
-
-/* ================================================= */
-/* CHECKOUT DATA */
-/* ================================================= */
-
-const checkout = ref({
-
-  name: '',
-
-  phone: '',
-
-  address: '',
-
-  delivery: 'standard',
-
-  payment: 'cod'
-
-})
-
-
-const deliveryOptions = [
-
+const superProducts = [
   {
+    name: 'Modern Laptop Computer',
 
-    label:
-      'Standard Delivery - ৳ 85',
+    image:
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=700&q=80',
 
-    value:
-      'standard'
-
+    price: '36,622৳',
+    oldPrice: '47,982৳',
+    discount: '-24%'
   },
 
   {
+    name: 'Wireless Headphones',
 
-    label:
-      'Express Delivery - ৳ 150',
+    image:
+      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=700&q=80',
 
-    value:
-      'express'
+    price: '1,388.67৳',
+    oldPrice: '3,585.94৳',
+    discount: '-61%'
+  },
 
+  {
+    name: 'Digital Camera',
+
+    image:
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=700&q=80',
+
+    price: '15,532৳',
+    oldPrice: '23,456৳',
+    discount: '-35%'
   }
-
 ]
 
 
-const paymentOptions = [
+/* ==================================================
+   SUPER BUYER PRODUCTS
+================================================== */
 
+const bulkSaverProducts = [
   {
+    name: 'Fast Charging Cable',
 
-    label:
-      'Cash on Delivery',
+    image:
+      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=600&q=80',
 
-    value:
-      'cod'
-
+    price: '133.89৳',
+    oldPrice: '574.87৳',
+    tag: 'Popular picks'
   },
 
   {
+    name: 'Gaming Headset',
 
-    label:
-      'bKash',
+    image:
+      'https://images.unsplash.com/photo-1585298723682-7115561c51b7?auto=format&fit=crop&w=600&q=80',
 
-    value:
-      'bkash'
-
+    price: '133.89৳',
+    oldPrice: '479.70৳',
+    tag: 'Popular picks'
   },
 
   {
+    name: 'GaN Charger',
 
-    label:
-      'Card Payment',
+    image:
+      'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=600&q=80',
 
-    value:
-      'card'
-
+    price: '195.31৳',
+    oldPrice: '1,225.91৳',
+    tag: 'Verified'
   }
-
 ]
 
 
-const deliveryCharge =
-  computed(() => {
-
-    return checkout.value.delivery ===
-      'express'
-      ? 150
-      : 85
-
-  })
-
-
-const checkoutTotal =
-  computed(() => {
-
-    return (
-      productPrice *
-      quantity.value
-    ) +
-    deliveryCharge.value
-
-  })
-
-
-const placeOrder = () => {
-
-  checkoutDialog.value = false
-
-
-  $q.dialog({
-
-    title:
-      'Order Confirmed',
-
-    message:
-      `Thank you ${checkout.value.name}! Your order has been placed successfully. Total: ৳ ${checkoutTotal.value}`,
-
-    ok: {
-
-      label: 'Done',
-
-      color: 'primary'
-
-    }
-
-  })
-
-}
-
-
-/* ================================================= */
-/* DELIVERY ADDRESS */
-/* ================================================= */
-
-const deliveryArea = ref(
-  'Dhaka, Dhaka North, Banani'
-)
-
-
-const deliveryAddress = ref(
-  'Road No. 12 - 19'
-)
-
-
-const addressDialog = ref(false)
-
-const tempAddress = ref('')
-
-
-const saveAddress = () => {
-
-  if (
-    !tempAddress.value.trim()
-  ) {
-
-    $q.notify({
-
-      type: 'warning',
-
-      message:
-        'Please enter an address'
-
-    })
-
-    return
-
-  }
-
-
-  deliveryAddress.value =
-    tempAddress.value
-
-  addressDialog.value = false
-
-  $q.notify({
-
-    type: 'positive',
-
-    message:
-      'Delivery address updated'
-
-  })
-
-}
-
-
-/* ================================================= */
-/* WISHLIST */
-/* ================================================= */
-
-const wishlist = ref(false)
-
-
-const toggleWishlist = () => {
-
-  wishlist.value =
-    !wishlist.value
-
-
-  $q.notify({
-
-    type:
-      wishlist.value
-        ? 'positive'
-        : 'info',
-
-    message:
-      wishlist.value
-        ? 'Added to wishlist'
-        : 'Removed from wishlist'
-
-  })
-
-}
-
-
-const showWishlist = () => {
-
-  $q.notify({
-
-    type:
-      wishlist.value
-        ? 'positive'
-        : 'info',
-
-    message:
-      wishlist.value
-        ? 'Product is in your wishlist'
-        : 'Wishlist is empty'
-
-  })
-
-}
-
-
-/* ================================================= */
-/* SHARE */
-/* ================================================= */
-
-const shareProduct = async () => {
-
-  if (navigator.share) {
-
-    await navigator.share({
-
-      title:
-        'Stylish Full Check Trouser',
-
-      text:
-        'Check this product'
-
-    })
-
-  } else {
-
-    $q.notify({
-
-      type: 'info',
-
-      message:
-        'Share is not supported in this browser'
-
-    })
-
-  }
-
-}
-
-
-/* ================================================= */
-/* PRODUCT DETAILS */
-/* ================================================= */
-
-const showDetails = ref(false)
-
-
-/* ================================================= */
-/* RATING */
-/* ================================================= */
-
-const productRating = ref(5)
-
-const ratingCount = ref(96)
-
-const userRating = ref(0)
-
-const userReview = ref('')
-
-
-/* ================================================= */
-/* REVIEWS */
-/* ================================================= */
-
-const reviews = ref([
-
+const buyAgainProducts = [
   {
+    name: 'Humidifier',
 
-    id: 1,
+    image:
+      'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=600&q=80',
 
-    name:
-      'Ahnaf A.',
-
-    rating: 5,
-
-    comment:
-      'Got the correct size and the quality is good for the price.',
-
-    helpful: 0
-
+    price: '362.85৳',
+    oldPrice: '2,150.90৳',
+    tag: 'Popular picks'
   },
 
   {
+    name: 'USB Adapter',
 
-    id: 2,
+    image:
+      'https://images.unsplash.com/photo-1587033411391-5d9e51cce126?auto=format&fit=crop&w=600&q=80',
 
-    name:
-      'Nazrul Farazi',
-
-    rating: 4,
-
-    comment:
-      'packing was good but stitching quality is not good',
-
-    helpful: 0
-
+    price: '1,265.23৳',
+    oldPrice: '3,551.62৳',
+    tag: 'Popular picks'
   },
 
   {
+    name: 'Living Room Rug',
 
-    id: 3,
+    image:
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80',
 
-    name:
-      'Customer',
-
-    rating: 5,
-
-    comment:
-      'ডেলিভারি দ্রুত এসেছে ধন্যবাদ',
-
-    helpful: 0
-
+    price: '307.87৳',
+    oldPrice: '1,989.28৳',
+    tag: 'Popular picks'
   }
-
-])
-
-
-const submitReview = () => {
-
-  if (!userRating.value) {
-
-    $q.notify({
-
-      type: 'warning',
-
-      message:
-        'Please select a rating'
-
-    })
-
-    return
-
-  }
-
-
-  if (
-    !userReview.value.trim()
-  ) {
-
-    $q.notify({
-
-      type: 'warning',
-
-      message:
-        'Please write a review'
-
-    })
-
-    return
-
-  }
-
-
-  reviews.value.unshift({
-
-    id: Date.now(),
-
-    name: 'You',
-
-    rating:
-      userRating.value,
-
-    comment:
-      userReview.value,
-
-    helpful: 0
-
-  })
-
-
-  userRating.value = 0
-
-  userReview.value = ''
-
-
-  $q.notify({
-
-    type: 'positive',
-
-    message:
-      'Your review has been added'
-
-  })
-
-}
-
-
-/* ================================================= */
-/* REVIEW SORT / FILTER */
-/* ================================================= */
-
-const reviewSortOptions = [
-
-  'Relevance',
-
-  'Newest',
-
-  'Highest Rating',
-
-  'Lowest Rating'
-
 ]
 
 
-const reviewFilterOptions = [
+/* ==================================================
+   SHOP BY CATEGORY
+================================================== */
 
-  'All stars',
+const fashionCategoryProducts = [
+  {
+    name: 'White Dress',
 
-  '5 stars',
+    image:
+      'https://images.unsplash.com/photo-1566206091558-7f218b696731?auto=format&fit=crop&w=500&q=80',
 
-  '4 stars',
+    price: '2,358.46৳',
+    oldPrice: '3,685.09৳',
+    rating: '4.5',
+    sold: '1,000+'
+  },
 
-  '3 stars',
+  {
+    name: 'Fashion Dress',
 
-  '2 stars',
+    image:
+      'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=500&q=80',
 
-  '1 star'
+    price: '1,293.46৳',
+    oldPrice: '2,864.54৳',
+    rating: '4.9',
+    sold: '500+'
+  },
 
+  {
+    name: 'Winter Fashion',
+
+    image:
+      'https://images.unsplash.com/photo-1548624313-0396c75e4b1a?auto=format&fit=crop&w=500&q=80',
+
+    price: '5,823.86৳',
+    oldPrice: '11,908.55৳',
+    rating: '4.9',
+    sold: '10,000+'
+  }
 ]
 
 
-const reviewSort =
-  ref('Relevance')
-
-
-const reviewFilter =
-  ref('All stars')
-
-
-const filteredReviews =
-  computed(() => {
-
-    let result =
-      [...reviews.value]
-
-
-    if (
-      reviewFilter.value !==
-      'All stars'
-    ) {
-
-      const star =
-        Number(
-          reviewFilter.value.charAt(0)
-        )
-
-
-      result =
-        result.filter(
-          review =>
-            review.rating === star
-        )
-
-    }
-
-
-    if (
-      reviewSort.value ===
-      'Highest Rating'
-    ) {
-
-      result.sort(
-        (a, b) =>
-          b.rating - a.rating
-      )
-
-    }
-
-
-    if (
-      reviewSort.value ===
-      'Lowest Rating'
-    ) {
-
-      result.sort(
-        (a, b) =>
-          a.rating - b.rating
-      )
-
-    }
-
-
-    if (
-      reviewSort.value ===
-      'Newest'
-    ) {
-
-      result.sort(
-        (a, b) =>
-          b.id - a.id
-      )
-
-    }
-
-
-    return result
-
-  })
-
-
-/* ================================================= */
-/* RATING BREAKDOWN */
-/* ================================================= */
-
-const ratingBreakdown = [
-
+const shopCategories = [
   {
+    name: "Women's Clothing",
 
-    star: 5,
-
-    value: 0.65,
-
-    count: 56
-
+    image:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80'
   },
 
   {
+    name: "Men's Clothing",
 
-    star: 4,
-
-    value: 0.20,
-
-    count: 18
-
+    image:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80'
   },
 
   {
+    name: 'Toys & Games',
 
-    star: 3,
-
-    value: 0.08,
-
-    count: 6
-
+    image:
+      'https://images.unsplash.com/photo-1559454403-b8fb88521f11?auto=format&fit=crop&w=500&q=80'
   },
 
   {
+    name: 'Furniture',
 
-    star: 2,
-
-    value: 0.06,
-
-    count: 5
-
+    image:
+      'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=500&q=80'
   },
 
   {
+    name: 'Beauty & Health',
 
-    star: 1,
+    image:
+      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=500&q=80'
+  },
 
-    value: 0.12,
+  {
+    name: 'Shoes',
 
-    count: 11
-
+    image:
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80'
   }
-
 ]
 
 
-/* ================================================= */
-/* QUESTIONS */
-/* ================================================= */
+/* ==================================================
+   MORE TO LOVE
+================================================== */
 
-const questions = ref([
-
+const moreLoveProducts = [
   {
+    name: 'Portable High Pressure Cleaning Spray Kit',
 
-    id: 1,
+    image:
+      'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=500&q=80',
 
-    question:
-      '10 years er cheler jonno hobe???',
-
-    date:
-      'Jannatul ferdows - 19 Nov 2022',
-
-    answer:
-      'komorer size 26-28 hole M size nite parben'
-
+    price: '852.33৳',
+    oldPrice: '2,491.49৳',
+    rating: '3.4',
+    sold: '411',
+    deal: '250৳ off on 1,900৳+'
   },
 
   {
+    name: 'Smart Stainless Steel Multifunction Ring',
 
-    id: 2,
+    image:
+      'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=500&q=80',
 
-    question:
-      'লম্বা কত হবে',
+    price: '47.9৳',
+    oldPrice: '',
+    rating: '4.3',
+    sold: '2,000+',
+    deal: '250৳ off on 1,900৳+'
+  },
 
-    date:
-      '1****1 - 06 Oct 2022',
+  {
+    name: 'Portable Wireless Heavy Bass Speaker',
 
-    answer:
-      'Multicolor Random dewa hoy'
+    image:
+      'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=500&q=80',
 
+    price: '379.56৳',
+    oldPrice: '',
+    rating: '3.8',
+    sold: '3,000+',
+    deal: 'Save 791.28৳'
+  },
+
+  {
+    name: 'Smart Watch Series 11 Fitness Watch',
+
+    image:
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80',
+
+    price: '453.27৳',
+    oldPrice: '1,337.44৳',
+    rating: '4.1',
+    sold: '5,000+',
+    deal: 'Best price in similar deals'
+  },
+
+  {
+    name: 'Precision Screwdriver Tool Set',
+
+    image:
+      'https://images.unsplash.com/photo-1581147036324-c1c7c2c0d187?auto=format&fit=crop&w=500&q=80',
+
+    price: '386.47৳',
+    oldPrice: '555.21৳',
+    rating: '4.1',
+    sold: '5,000+',
+    deal: '250৳ off on 1,900৳+'
+  },
+
+  {
+    name: 'Men Fashion Black Slippers',
+
+    image:
+      'https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=500&q=80',
+
+    price: '624.66৳',
+    oldPrice: '2,026.92৳',
+    rating: '4.1',
+    sold: '4,000+',
+    deal: '250৳ off on 1,900৳+'
   }
-
-])
-
-
-const newQuestion = ref('')
-
-
-const submitQuestion = () => {
-
-  if (
-    !newQuestion.value.trim()
-  ) {
-
-    $q.notify({
-
-      type: 'warning',
-
-      message:
-        'Please write your question'
-
-    })
-
-    return
-
-  }
-
-
-  questions.value.push({
-
-    id: Date.now(),
-
-    question:
-      newQuestion.value,
-
-    date:
-      'Just now',
-
-    answer:
-      'Your question has been received.'
-
-  })
-
-
-  newQuestion.value = ''
-
-
-  $q.notify({
-
-    type: 'positive',
-
-    message:
-      'Question submitted'
-
-  })
-
-}
+]
 
 </script>
-
-
-<style scoped>
-
-/* ================================================= */
-/* PAGE */
-/* ================================================= */
-
-.page-container {
-
-  max-width: 1500px;
-
-  margin: auto;
-
-  padding: 16px;
-
-}
-
-
-/* ================================================= */
-/* GALLERY */
-/* ================================================= */
-
-.main-image-wrapper {
-
-  position: relative;
-
-  background: white;
-
-}
-
-
-.main-product-image {
-
-  cursor: zoom-in;
-
-}
-
-
-.gallery-arrow {
-
-  position: absolute;
-
-  top: 50%;
-
-  transform:
-    translateY(-50%);
-
-  z-index: 5;
-
-  background:
-    rgba(255, 255, 255, 0.9);
-
-}
-
-
-.left-arrow {
-
-  left: 8px;
-
-}
-
-
-.right-arrow {
-
-  right: 8px;
-
-}
-
-
-.image-number {
-
-  position: absolute;
-
-  right: 12px;
-
-  bottom: 12px;
-
-  background:
-    rgba(0, 0, 0, 0.65);
-
-  color: white;
-
-  padding:
-    5px 10px;
-
-  border-radius: 4px;
-
-  z-index: 5;
-
-}
-
-
-.thumbnail {
-
-  border:
-    1px solid #ddd;
-
-  cursor: pointer;
-
-  background: white;
-
-}
-
-
-.selected-thumbnail {
-
-  border:
-    2px solid #ff6b00;
-
-}
-
-
-/* ================================================= */
-/* IMAGE PREVIEW */
-/* ================================================= */
-
-.preview-card {
-
-  background:
-    rgba(0, 0, 0, 0.96);
-
-  width: 100%;
-
-  height: 100%;
-
-  position: relative;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-}
-
-
-.preview-image {
-
-  width: 90%;
-
-  height: 90%;
-
-}
-
-
-.preview-close {
-
-  position: absolute;
-
-  right: 20px;
-
-  top: 20px;
-
-  z-index: 10;
-
-}
-
-
-.preview-left {
-
-  position: absolute;
-
-  left: 25px;
-
-  top: 50%;
-
-  transform:
-    translateY(-50%);
-
-  z-index: 10;
-
-}
-
-
-.preview-right {
-
-  position: absolute;
-
-  right: 25px;
-
-  top: 50%;
-
-  transform:
-    translateY(-50%);
-
-  z-index: 10;
-
-}
-
-
-.preview-count {
-
-  position: absolute;
-
-  bottom: 25px;
-
-  color: white;
-
-  font-size: 18px;
-
-}
-
-
-/* ================================================= */
-/* PRODUCT */
-/* ================================================= */
-
-.product-title {
-
-  font-size: 28px;
-
-  line-height: 1.3;
-
-}
-
-
-.price {
-
-  color: #f57224;
-
-  font-size: 42px;
-
-}
-
-
-.old-price {
-
-  color: #999;
-
-  text-decoration:
-    line-through;
-
-}
-
-
-.option-label {
-
-  width: 120px;
-
-  color: #666;
-
-}
-
-
-.color-btn {
-
-  border:
-    1px solid #ddd;
-
-}
-
-
-.active-color {
-
-  color: #ff6b00;
-
-  border:
-    2px solid #ff6b00;
-
-}
-
-
-.color-image {
-
-  border:
-    2px solid #ff6b00;
-
-}
-
-
-.size-container {
-
-  display: flex;
-
-  flex-wrap: wrap;
-
-  gap: 8px;
-
-}
-
-
-.size-btn {
-
-  min-width: 65px;
-
-  border:
-    1px solid #ddd;
-
-}
-
-
-.active-size {
-
-  color: #ff6b00;
-
-  border:
-    2px solid #ff6b00;
-
-}
-
-
-.quantity {
-
-  width: 45px;
-
-  text-align: center;
-
-  font-size: 18px;
-
-}
-
-
-.buy-btn {
-
-  background:
-    #2bb8df;
-
-  color: white;
-
-  height: 55px;
-
-}
-
-
-.cart-btn {
-
-  background:
-    #f57224;
-
-  color: white;
-
-  height: 55px;
-
-}
-
-
-/* ================================================= */
-/* DELIVERY */
-/* ================================================= */
-
-.side-section {
-
-  padding: 20px;
-
-}
-
-
-.side-title {
-
-  color: #667085;
-
-  font-weight: 600;
-
-}
-
-
-/* ================================================= */
-/* PRODUCT DETAILS */
-/* ================================================= */
-
-.product-details {
-
-  margin: 0;
-
-  padding-left: 22px;
-
-  line-height: 1.8;
-
-  font-size: 16px;
-
-}
-
-
-.product-details li {
-
-  margin-bottom: 3px;
-
-}
-
-
-.extra-details {
-
-  margin-top: 12px;
-
-  padding-top: 12px;
-
-  border-top:
-    1px solid #eeeeee;
-
-}
-
-
-/* ================================================= */
-/* SECTION */
-/* ================================================= */
-
-.section-title {
-
-  padding: 20px;
-
-  font-size: 21px;
-
-  font-weight: 600;
-
-}
-
-
-/* ================================================= */
-/* RATING */
-/* ================================================= */
-
-.big-rating {
-
-  font-size: 60px;
-
-}
-
-
-.big-rating span {
-
-  color: #999;
-
-  font-size: 25px;
-
-}
-
-
-.rating-bar {
-
-  width: 280px;
-
-}
-
-
-/* ================================================= */
-/* REVIEWS */
-/* ================================================= */
-
-.review {
-
-  border-top:
-    1px solid #eee;
-
-}
-
-
-/* ================================================= */
-/* QUESTIONS */
-/* ================================================= */
-
-.question {
-
-  display: flex;
-
-  gap: 18px;
-
-  border-bottom:
-    1px solid #eee;
-
-  padding-bottom: 20px;
-
-}
-
-
-.question-icon {
-
-  min-width: 30px;
-
-  height: 30px;
-
-  background:
-    #20a5c7;
-
-  color: white;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-}
-
-
-.question-text {
-
-  font-size: 18px;
-
-}
-
-
-.answer {
-
-  font-size: 16px;
-
-}
-
-
-.answer-icon {
-
-  background: #aaa;
-
-  color: white;
-
-  padding:
-    4px 8px;
-
-  margin-right: 8px;
-
-}
-
-
-/* ================================================= */
-/* CART */
-/* ================================================= */
-
-.cart-dialog {
-
-  width: 550px;
-
-  max-width: 92vw;
-
-}
-
-
-/* ================================================= */
-/* CHECKOUT */
-/* ================================================= */
-
-.checkout-dialog {
-
-  width: 650px;
-
-  max-width: 95vw;
-
-}
-
-
-/* ================================================= */
-/* ADDRESS */
-/* ================================================= */
-
-.address-dialog {
-
-  width: 450px;
-
-  max-width: 90vw;
-
-}
-
-
-/* ================================================= */
-/* FOOTER */
-/* ================================================= */
-
-.footer {
-
-  background: white;
-
-}
-
-
-/* ================================================= */
-/* MOBILE */
-/* ================================================= */
-
-@media (max-width: 700px) {
-
-  .page-container {
-
-    padding: 8px;
-
-  }
-
-
-  .product-title {
-
-    font-size: 21px;
-
-  }
-
-
-  .price {
-
-    font-size: 34px;
-
-  }
-
-
-  .rating-bar {
-
-    width: 160px;
-
-  }
-
-
-  .preview-left {
-
-    left: 5px;
-
-  }
-
-
-  .preview-right {
-
-    right: 5px;
-
-  }
-
-
-  .preview-image {
-
-    width: 95%;
-
-  }
-
-
-  .section-title {
-
-    font-size: 18px;
-
-  }
-
-}
-
-</style>
